@@ -1,0 +1,222 @@
+---
+title: "segHT Main Utility Functions"
+author: "Patricia Haden for Miller & Ulrich (2020)"
+date: "29 June 2020"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+segHT exposes four top-level utility functions that perform the computations required to design a complete Segmented Hypothesis Testing protocol: alpha_weak, n_for_power, segmented_hyp_test_outcomes, and search_kmax. 
+
+This document describes these methods, and contains an example of how they might be used to explore protocol performance more broadly (specifically, how to compute expected sample size as a function of true effect base rate; see below). Users who wish to work directly with the source code can extend these sorts of explorations further by employing the underlying S3 classes in package segHT.
+
+
+## alpha_weak
+
+### Usage
+
+alpha_weak(max_n_segments, alpha_total, alpha_strong)
+
+### Arguments
+
+Argument|Definition
+--------|----------
+max_n_segments|Maximum number of segments to be run before termination.
+alpha_total|Desired total Type 1 error probability across the entire study.
+alpha_strong|For decision rule: If p-observed for a segment is less than alpha strong, stop testing and reject H0.
+
+### Value
+
+Returns value of alpha weak to produce correct overall Type 1 error probability (i.e. alpha_total).
+
+
+**********
+
+## n_for_power
+
+### Usage
+
+n_for_power(target_power, stat_procedure_name, true_effect_size, max_n_segments = 3, n_per_segment = 50, alpha_total = 0.05, alpha_strong = 0.025, alpha_weak = NA)
+
+### Arguments
+
+Argument|Definition
+--------|----------
+target_power|Desired power level (probability of rejecting H0 when an effect is present) across all segments of the study.
+stat_procedure_name|Character code for hypothesis testing procedure to be used in the study. Currently must be one of {'1t', '2t', 'r', '1z', '2z'}.
+true_effect_size|Value representing the researcher's expectation about what size the true effect will be if it is present. (See section Estimating True Effect Size below for details.)
+max_n_segments|Maximum number of segments to be run before termination.
+n_per_segment|"Best guess" for number of subjects to be tested in each segment. Used as a starting value by the numerical search algirithm. If the desired power cannot be obtained with this value, it will be automatically adjusted during computation.
+alpha_total|Desired total Type 1 error probability across the entire study.
+alpha_strong|For decision rule: If p-observed for a segment is less than alpha strong, stop testing and reject H0.
+alpha_weak| For decision rule: If p-observed for a segment is greater than alpha weak, stop testing and fail to reject H0. If this argument is not provided, the correct value is computed in the method.
+
+### Details
+
+The number of subjects required to achieve the target power is determined by numerical search using pracma::fminbnd. The function numerically minimises the difference between the power obtained by a target value of n and the desired power. The power obtained is computed analytically using method seght::run_scenario.SegmentedHypTestEngine(...). See source code for logic.
+
+### Value
+
+Returns a real equal to the number of subjects per segment that most closely produces the target power. This function wraps method segHT::n_for_power_computation, which returns additional summary values. See source code for details.
+
+**********
+
+## segmented_hyp_test_outcomes
+
+### Usage                                
+
+segmented_hyp_test_outcomes(max_n_segments, n_per_segment, alpha_total,  alpha_strong, stat_procedure_name, effect_sizes, base_rates)
+
+### Arguments
+
+Argument|Definition
+--------|----------
+max_n_segments|Maximum number of segments to be run before termination.
+n_per_segment| Number of subjects to be tested in each segment.
+alpha_total|Desired total Type 1 error probability across the entire study.
+alpha_strong|For decision rule: If p-observed for a segment is less than alpha strong, stop testing and reject H0.
+stat_procedure_name|Character code for hypothesis testing procedure to be used in the study. Currently must be one of {'1t', '2t', 'r', '1z', '2z'}.
+effect_sizes|Value or vector of values representing the researcher's expectation about what size the true effect(s) will be if present. (See section Estimating True Effect Size below for details.)
+base rates|Probabilities for each effect size occurrence. Each value must be between 0 and 1. If the total of all base rates is less than 1, the remaining probability applies to effect size 0 (i.e. H0 is true).
+
+### Details
+
+This method wraps seght::run_scenario.SegmentedHypTestEngine(...) to numerically determine the probabilities of all outcomes (reject, fail to reject, or continue) for each potential segment, plus a variety of useful summary descriptors of study performance.
+
+### Value                                                           
+
+Returns a list (collection of named items) containing all method input values (for reference) plus:
+  
+Value|Definition
+--------|----------  
+exp_n_subj|The expected (mean across infinite replications of the whole study) number of subjects used.
+avg_power| Average power level of the study across all cases where Ho is false.
+pr_reject_by_segment| Probability of stopping and rejecting H0 at each segment.
+pr_ftr_by_segment| Probability of stopping and failing to reject H0 at each segment.
+
+**********
+
+## search_kmax
+
+### Usage
+
+search_kmax(alpha_total,  alpha_strong, stat_procedure_name, target_power,  true_effect_size,  effect_size_probability = 1)
+
+### Arguments
+
+Argument|Definition
+--------|----------
+alpha_total|Desired total Type 1 error probability across the entire study.
+alpha_strong|For decision rule: If p-observed for a segment is less than alpha strong, stop testing and reject H0.
+stat_procedure_name|Character code for hypothesis testing procedure to be used in the study Currently must be one of {'1t', '2t', 'r', '1z', '2z'}.
+target_power|Desired power level (probability of detecting a false H0 when present) across all segments of the study.
+true_effect_size|Value representing the researcher's expectation about what size the true effect will be if it is present. (See section Estimating True Effect Size below for details.)
+effect_size_probability|Base rate for effect size occurrence. Must be between 0 and 1. If this value is less than 1, the remaining probability applies to effect size 0 (i.e. H0 is true).
+
+### Details
+
+This method computes a set of performance descriptors (see Values, below) for the specified experimental scenario for each value of kmax (maximum number of segments) between 2 and 10. Returned values are those required to achieve the provided target power.
+
+### Value
+
+Returns a data frame with one row for each value of kmax between 2 and 10, and columns:   
+
+Value|Definition
+--------|----------  
+kmax|Number of segments.
+alpha_weak| For decision rule: If p-observed for a segment is greater than alpha weak, stop testing and fail to reject H0.
+n_per_segment| Number of subjects per segment.
+exp_n_subjects| Expected (mean) number of subjects required across infinite replications of the study.
+exp_n_segments| Expected (mean) number of segments that will be performed prior to termination (with any outcome) across infinite replications of the study.
+
+
+## Estimating true effect size
+
+Formally, true effect size is defined for each statistical test as follows:
+
+Test(s) | Effect Size Definition
+-----|-----------------------
+One sample z and one sample t| Effect size is Cohen's d, which in these tests is the true mean of the dependent variable divided by its true standard deviation. (For paired data, the "dependent variable" refers to the difference scores, pair by pair.)
+Two sample z and two sample t | Effect size is Cohen's d, which in these tests is the difference of the two true means divided by the pooled standard deviation of the scores within each group.
+Pearson r| Effect size is the true correlation
+
+Several segHT methods accept an estimate of **true effect size**, which is used primarily in computations of power. For statistical tests based on group means, Cohen (1988) recommends using values of 0.2, 0.5, and 0.8 to represent small, medium, and large effects, respectively. For correlations, true effect size is the true population correlation, which must be estimated. To guide their estimates of true effect size, researchers can refer to the relevant literature or use representative observed data values.
+
+
+## Extended example
+The following code computes and plots expected sample size as a function of true effect base rate across three different levels of experimental power (cf. Figure 3, Miller & Ulrich, 2020).
+
+
+```{r Extended Example}
+library(segHT)
+
+# To show the effect of base rate (ranges from 0 to 1) on expected sample size
+# (number of subjects) for a given effect size and power.
+
+# Plan
+#
+# 1) Set your effect size
+# 2) Set your power
+# 3) Set your kmax, alpha total and alpha strong
+# 4) Call alpha_weak() to get alpha_weak
+# 3) Call n_for_power(n_per_segment) to find n_per_segment
+# 4) for base rate from 0 to 1 in steps, call segmented_hyp_test_outcomes with the single
+#    effect size to get n_expected
+
+
+# Panes A, B, and C in Figure 3, Miller & Ulrich (2000)
+max_n_segments <- 3
+alpha_total <- 0.025
+alpha_strong <- 0.01
+stat_procedure_name <- "1z"
+true_effect_size <- 0.2
+target_power_vector <- c(0.7, 0.8, 0.9)
+base_rate_vector <- seq(0, 1, 0.01)
+y_axis_limits <- c(0,300)
+
+
+# Setup layout for three plots
+par(mfrow = c(1,3))
+
+for (target_power in target_power_vector)
+{
+  alpha_weak <- segHT::alpha_weak(max_n_segments, alpha_total, alpha_strong)
+  n_per_segment <- segHT::n_for_power(target_power,
+                                    stat_procedure_name,
+                                    true_effect_size,
+                                    max_n_segments,
+                                    alpha_total,
+                                    alpha_strong,
+                                    alpha_weak)
+
+  expected_sample_sizes <- c()
+  for (base_rate in base_rate_vector)
+  {
+    outcomes <- segHT::segmented_hyp_test_outcomes(max_n_segments,
+                                            n_per_segment,
+                                            alpha_total,
+                                            alpha_strong,
+                                            stat_procedure_name,
+                                            true_effect_size,
+                                            base_rate)
+    expected_sample_sizes <- c(expected_sample_sizes, outcomes$exp_n_subj)
+    
+  } # for base_rate in base_rate_vector
+  
+  # Make the graph
+  plot(base_rate_vector, expected_sample_sizes, pch = 18,
+       ylim = y_axis_limits,
+       ylab = "Expected Sample Size", xlab = "Base Rate")
+
+} # for target_power in target_power_vector
+```
+
+## References
+
+Cohen J. (1988). Statistical Power Analysis for the Behavioral Sciences. New York, NY: Routledge Academic
+
+Miller J. & Ulrich, R. (2020). A Simple, General, and Efficient Procedure for Sequential Hypothesis Testing: The Independent Segments Method. In preparation.
