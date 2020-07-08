@@ -4,7 +4,7 @@ author: "Patricia Haden for Miller & Ulrich (2020)"
 date: "14 March 2020"
 output:
   html_document: default
-  word_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -27,18 +27,17 @@ source("../../R/SegmentedHypTestUtilities.R")
 ```
 
 
-# R Code Base for Segmented Hypothesis Testing (Miller & Ulrich, 2020)
+# R Code Base for Independent Segments Hypothesis Testing (Miller & Ulrich, 2020)
 
-Miller and Ulrich (2020) describe Segmented Hypothesis Testing, a novel protocol that divides a study into multiple segments, each comprising a subset of the total subjects to be tested. After each segment, a standard null hypothesis significance test is run on the data collected **in that segment**, and the researcher rejects H0, fails to reject H0, or continues to the next segment depending on the p-value resulting from the test (see below for further detail). Miller and Ulrich's method insures an overall fixed Type 1 error rate (alpha level) as in traditional NHST designs, while potentially reducing the number of subjects required.
+Miller and Ulrich (2020) describe Independent Segments Hypothesis Testing, a novel protocol that divides a study into multiple segments, each comprising a subset of the total subjects to be tested. After each segment, a standard null hypothesis significance test is run on the data collected **in that segment alone**, and the researcher rejects H0, fails to reject H0, or continues to the next segment depending on the p-value resulting from the test (see below for further detail). Miller and Ulrich's method insures an overall fixed Type 1 error rate (alpha level) as in traditional null hypothesis significance testing (NHST) designs, while potentially reducing the number of subjects required.
 
-The **segHT** ("seg aitch tee") R package contains code to perform the computations necessary to fully describe a Segmented Hypothesis Testing protocol, allowing the user to explore the requirements under various assumptions about the number of segments to be used, the number of subjects per segment, the expected effect size, and the desired power. Package segHT exposes its core functionality in four simple functions (contained in file
-SegmentedHypTestUtilities.R, for those using the source) that can be used without object creation. Users who are comfortable writing R scripts can employ the package's component S3 classes to extend the logic to more complicated applications such as simulation. This document describes the end-user-facing methods.
+The **segHT** ("seg aitch tee") R package contains code to perform the computations necessary to fully describe an Independent Segments Hypothesis Testing protocol, allowing the user to explore the requirements under various assumptions about the number of segments to be used, the number of subjects per segment, the expected effect size, and the desired power. Package segHT exposes its core functionality in four simple functions (contained in file SegmentedHypTestUtilities.R, for those using the source) that can be used without object creation. Users who are comfortable writing R scripts can employ the package's component S3 classes to extend the logic to more complicated applications such as simulation. This document describes the end-user-facing methods.
 
-## Segmented Hypothesis Testing Parameters
+## Independent Segments Hypothesis Testing Parameters
 
-A Segmented Hypothesis Testing study protocol is described by the following parameters:
+An Independent Segments Hypothesis Testing study protocol is described by the following parameters:
 
-* Statistical procedure: The NHST method to be used. Currently segHT supports one and two sample t-tests, one and two sample z-tests, and Pearson r.
+* Statistical procedure: The NHST method to be used. The Independent Segments Procedure can be used with any hypothesis testing method that provides traditional "p", but computations of power and expected sample size depend on the procedure. Currently, segHT supports power and sample size computations for one and two sample t-tests, one and two sample z-tests, and Pearson r.
 
 * Maximum number of segments: The maximum number of segments that will be run before termination of the study. Termination may occur before this number of segments is completed if a reject or fail-to-reject decision is reached in an earlier segment (see alpha weak and alpha strong, below). This parameter is denoted by "kmax" in the manuscript, for clarity in equations.
 
@@ -46,9 +45,9 @@ A Segmented Hypothesis Testing study protocol is described by the following para
 
 * The alphas
 
-  + Alpha total: The target Type 1 error rate for the study as a whole (i.e. rejection after any segment)
+  + Alpha total: The target total Type 1 error rate for the study as a whole (i.e., probability that a true H0 will be rejected after some segment)
 
-  + Alpha strong and alpha weak: Segmented Hypothesis Testing uses a multi-part rejection rule involving two criterion values -- alpha strong and alpha weak. After each segment the researcher determines the p-value for that segment and (1) stops the study and rejects H0 if p observed < alpha strong (2) stops the study and fails to reject H0 if p observed is greater than alpha weak (3) if neither of the two previous conditions apply, the researcher continues to the next segment, unless the current segment is the last one, in which case, H0 is rejected (see Miller & Ulrich, 2020 for details). 
+  + Alpha strong and alpha weak: Segmented Hypothesis Testing uses a multi-part rejection rule involving two criterion values -- alpha strong and alpha weak. After each segment the researcher determines the p-value for that segment and (1) stops the study and rejects H0 if p observed < alpha strong (2) stops the study and fails to reject H0 if p observed is greater than alpha weak (3) if neither of the two previous conditions apply, the researcher continues to the next segment, unless the current segment is the last one, in which case, H0 is rejected (see Miller & Ulrich, 2020, for details). 
 
   + The values of alpha total and alpha strong are chosen by the researcher as appropriate for the research area. Alpha weak is derived numerically as the value which insures that the overall Type 1 error probability of the study is equal to alpha total. See Miller & Ulrich for computational details. 
 
@@ -56,7 +55,7 @@ A Segmented Hypothesis Testing study protocol is described by the following para
 With package segHT's end-user facing functions, the user can:
 
 * Explore study options using different numbers of segments
-* Determine the correct value of alpha weak for a study
+* Determine the correct value of alpha weak for a study given desired values of alpha total and alpha strong
 * Compute the appropriate number of subjects per segment required to achieve a target level of power for a study.
 * Generate a summary of expected outcome probabilities for a fixed set of study descriptors, including the probability of rejecting H0, and the expected number of subjects to be tested.
 
