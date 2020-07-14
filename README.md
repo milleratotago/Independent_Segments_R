@@ -1,6 +1,6 @@
 # Independent_Segments
 Software to aid in choosing study parameters for hypothesis testing using the
-independent segments procedure of Miller and Ulrich.
+independent segments procedure of Miller and Ulrich (Psychological Methods, in press).
 
 ## Quick start
 
