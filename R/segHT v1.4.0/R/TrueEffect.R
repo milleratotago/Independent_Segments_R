@@ -1,4 +1,4 @@
-# Class TrueEffect: Holds effect size (TrueEffect$effect_size) and probablity (TrueEffect$effect_size_probability),
+# Class TrueEffect: Holds effect size (TrueEffect$effect_size) and probability (TrueEffect$effect_size_probability),
 # information needed to describe the true state of the world.
 #
 # An effect size of 0 implies that the null hypothesis (H0) is true.

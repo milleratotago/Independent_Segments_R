@@ -1,9 +1,9 @@
 Package: segHT
 Type: Package
 Title: Segmented Hypothesis Testing Utilities for Miller & Ulrich 2020
-Version: 1.2.1
-Author: Patricia Haden
-Maintainer: Patricia Haden <patriciahaden1@gmail.com>
+Version: 1.4.0
+Author: Patricia Haden & Jeff Miller
+Maintainer: Jeff Miller <miller@psy.otago.ac.nz>
 Description: Utilities for researchers using Segmented Hypothesis Testing.
 License: BSD_3_clause + file LICENSE
 Encoding: UTF-8

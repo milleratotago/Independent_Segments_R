@@ -5,6 +5,7 @@
 #' @importFrom pracma fzero
 #' @importFrom pracma fminbnd
 
+
 # Ignore this 13-03-20
 placeholder <- function()
 {
@@ -228,7 +229,12 @@ segmented_hyp_test_outcomes <- function(max_n_segments,
 
   # Pull other necessary values to build the return list
   alpha_weak <- segmented_researcher$alpha_weak # This value initialised in the SegmentedResearcher ctor
+
   exp_n_subj <- experiment_results$exp_n_subj
+  exp_n_subj_sqr = experiment_results$exp_n_subj_sqr
+  var_exp_n_subj <- exp_n_subj_sqr - (exp_n_subj^2)
+  sd_exp_n_subj <- sqrt(var_exp_n_subj)
+
   pr_reject_by_segment = experiment_results$pr_reject_by_segment
   pr_ftr_by_segment = experiment_results$pr_ftr_by_segment
 
@@ -241,6 +247,7 @@ segmented_hyp_test_outcomes <- function(max_n_segments,
                        stat_procedure = stat_procedure_name,
                        effects_list = effects_list,
                        exp_n_subj = exp_n_subj,
+                       sd_exp_n_subj = sd_exp_n_subj,
                        avg_power = avg_power,
                        pr_reject_by_segment = pr_reject_by_segment,
                        pr_ftr_by_segment = pr_ftr_by_segment)

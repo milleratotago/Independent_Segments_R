@@ -1,22 +1,36 @@
 # See seghtQuickStart.Rmd for detailed explanations
-rm(list = ls())
-
-library(pracma)
-library(SuppDists)
-library(stats)
 
 
-source("R/SegmentedHypTestResult.R")
-source("R/SegmentedResearcher.R")
-source("R/StatProcedureBase.R")
-source("R/StatProcedureOneSampleT.R")
-source("R/StatProcedureTwoSampleT.R")
-source("R/StatProcedurePearsonR.R")
-source("R/StatProcedureOneSampleZ.R")
-source("R/StatProcedureTwoSampleZ.R")
-source("R/TrueEffect.R")
-source("R/SegmentedHypTestEngine.R")
-source("R/SegmentedHypTestUtilities.R")
+#' @importFrom utils install.packages
+
+
+segHT_manual_setup <- function()
+{
+  rm(list = ls())
+
+  # Install packages if necessary
+  if (!require(pracma)) install.packages('pracma')
+  if (!require(stats)) install.packages('stats')
+  if (!require(SuppDists)) install.packages('SuppDists')
+
+  library(pracma)
+  library(SuppDists)
+  library(stats)
+
+
+  source("R/SegmentedHypTestResult.R")
+  source("R/SegmentedResearcher.R")
+  source("R/StatProcedureBase.R")
+  source("R/StatProcedureOneSampleT.R")
+  source("R/StatProcedureTwoSampleT.R")
+  source("R/StatProcedurePearsonR.R")
+  source("R/StatProcedureOneSampleZ.R")
+  source("R/StatProcedureTwoSampleZ.R")
+  source("R/TrueEffect.R")
+  source("R/SegmentedHypTestEngine.R")
+  source("R/SegmentedHypTestUtilities.R")
+}
+
 
 
 # segHT Utility Functions
@@ -94,7 +108,7 @@ segmented_hyp_test_outcomes_demo <- function()
   alpha_strong <- 0.025
 
   # State the expected effect size.
-  effect_size <- 0.2
+  effect_sizes <- 0.2
 
   # Call the function.
   # When not provided, the final base_rate parameter defaults to 1
@@ -103,7 +117,7 @@ segmented_hyp_test_outcomes_demo <- function()
                                                 alpha_total,
                                                 alpha_strong,
                                                 stat_procedure_name,
-                                                effect_size)
+                                                effect_sizes)
 
 
   # Look at your results
@@ -124,8 +138,8 @@ segmented_hyp_test_outcomes_demo <- function()
   alpha_strong <- 0.025
 
   # State the expected effect size and base rate probability.
-  effect_size <- 0.2
-  current_base_rate <- 0.6
+  effect_sizes <- 0.2
+  base_rates <- 0.6
 
   # Call the method, supplying a value for the base_rate argument
   seght_outcomes <- segmented_hyp_test_outcomes(max_n_segments,
@@ -133,8 +147,8 @@ segmented_hyp_test_outcomes_demo <- function()
                                                 alpha_total,
                                                 alpha_strong,
                                                 stat_procedure_name,
-                                                effect_size,
-                                                base_rate = current_base_rate)
+                                                effect_sizes,
+                                                base_rates)
 
 
   # Look at your results

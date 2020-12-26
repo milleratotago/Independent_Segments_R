@@ -1,10 +1,11 @@
 ---
 title: "segHT Quick Start"
 author: "Patricia Haden for Miller & Ulrich (2020)"
-date: "14 March 2020"
+date: "3 July 2020"
 output:
-  html_document: default
-  pdf_document: default
+  pdf_document:
+     toc: true
+     toc_depth: 3
 ---
 
 ```{r setup, include=FALSE}
@@ -27,13 +28,15 @@ source("../../R/SegmentedHypTestUtilities.R")
 ```
 
 
-# R Code Base for Independent Segments Hypothesis Testing (Miller & Ulrich, 2020)
+# Introduction
 
-Miller and Ulrich (2020) describe Independent Segments Hypothesis Testing, a novel protocol that divides a study into multiple segments, each comprising a subset of the total subjects to be tested. After each segment, a standard null hypothesis significance test is run on the data collected **in that segment alone**, and the researcher rejects H0, fails to reject H0, or continues to the next segment depending on the p-value resulting from the test (see below for further detail). Miller and Ulrich's method insures an overall fixed Type 1 error rate (alpha level) as in traditional null hypothesis significance testing (NHST) designs, while potentially reducing the number of subjects required.
+This document is an introduction to the R Code Base for use with the Independent Segments Procedure for hypothesis testing (Miller & Ulrich, 2020).
+With this procedure, the researcher collects the data of a study 
+in multiple segments, each comprising a subset of the total subjects to be tested. After each segment, a standard **one-tailed** null hypothesis significance test is run on the data collected **in that segment alone**, and the researcher rejects H0, fails to reject H0, or continues to the next segment depending on the p-value resulting from the test (see below for further detail). Miller and Ulrich's method insures an overall fixed Type 1 error rate (alpha level) as in traditional null hypothesis significance testing (NHST) designs, while on average reducing the number of subjects required to achieve a given level of power.
 
 The **segHT** ("seg aitch tee") R package contains code to perform the computations necessary to fully describe an Independent Segments Hypothesis Testing protocol, allowing the user to explore the requirements under various assumptions about the number of segments to be used, the number of subjects per segment, the expected effect size, and the desired power. Package segHT exposes its core functionality in four simple functions (contained in file SegmentedHypTestUtilities.R, for those using the source) that can be used without object creation. Users who are comfortable writing R scripts can employ the package's component S3 classes to extend the logic to more complicated applications such as simulation. This document describes the end-user-facing methods.
 
-## Independent Segments Hypothesis Testing Parameters
+# Independent Segments Hypothesis Testing Parameters
 
 An Independent Segments Hypothesis Testing study protocol is described by the following parameters:
 
@@ -54,13 +57,13 @@ An Independent Segments Hypothesis Testing study protocol is described by the fo
 
 With package segHT's end-user facing functions, the user can:
 
-* Explore study options using different numbers of segments
 * Determine the correct value of alpha weak for a study given desired values of alpha total and alpha strong
 * Compute the appropriate number of subjects per segment required to achieve a target level of power for a study.
 * Generate a summary of expected outcome probabilities for a fixed set of study descriptors, including the probability of rejecting H0, and the expected number of subjects to be tested.
+* Explore study options using different numbers of segments
 
 
-## segHT Utility Functions
+# segHT Utility Functions
 
 * alpha_weak: Accepts maximum number of segments, alpha total and alpha strong. Returns the required alpha weak.
 
@@ -82,18 +85,18 @@ One sample z and one sample t| Effect size is Cohen's d, which in these tests is
 Two sample z and two sample t | Effect size is Cohen's d, which in these tests is the difference of the two true means divided by the pooled standard deviation of the scores within each group.
 Pearson r| Effect size is the true correlation
 
-Several segHT methods accept an estimate of **true effect size**, which is used primarily in computations of power. For statistical tests based on group means, Cohen (1988) recommends using values of 0.2, 0.5, and 0.8 to represent small, medium, and large effects, respectively. For correlations, true effect size is the true population correlation, which must be estimated. To guide their effect size estimations, researchers can refer to the relevant literature or use representative observed data values.
+Several segHT methods accept an estimate of the true **effect size**, which is used primarily in computations of power. For statistical tests based on group means, Cohen (1988) recommends using values of 0.2, 0.5, and 0.8 to represent small, medium, and large effects, respectively. For correlations, true effect size is the true population correlation, which must be estimated by the researcher. To guide their effect size estimations, researchers can refer to the relevant literature or use representative observed data values.
 
 
-## segHT Utility Function Examples
+# segHT Utility Function Examples
 
-### alpha_weak
+## alpha_weak
 
 This method computes the correct value of alpha weak when the researcher has chosen the maximum number of segments, alpha total, and alpha strong. Note that the computation of alpha weak does not depend on the statistical test being used.
 
 ```{r alpha_weak}
 
-# Initialise value parameters
+# Initialise planned study parameters
 max_n_segments <- 3
 alpha_total <- 0.05
 alpha_strong <- 0.025
@@ -107,7 +110,7 @@ print(required_alpha_weak)
 ```
 
 
-### n_for_power
+## n_for_power
 
 Given a complete set of study parameters (alpha total, number of segments, etc.) including an estimated true effect size, this method computes the number of subjects to use per segment to achieve a desired level of power.
 
@@ -123,7 +126,7 @@ alpha_total <- 0.05
 alpha_strong <- 0.025
 
 # State the expected effect size
-true_effect_size <- 0.5
+effect_size <- 0.5
 
 # State the desired power 
 target_power <- 0.8
@@ -131,7 +134,7 @@ target_power <- 0.8
 # Call the function
 required_n_per_segment <- n_for_power(target_power, 
                                       stat_procedure_name,
-                                      true_effect_size,
+                                      effect_size,
                                       max_n_segments,
                                       alpha_total,
                                       alpha_strong)
@@ -141,7 +144,7 @@ required_n_per_segment <- n_for_power(target_power,
 print(required_n_per_segment)
 ```
 
-### segmented_hyp_test_outcomes
+## segmented_hyp_test_outcomes
 
 Given a full description of a segmented hypothesis testing protocol, this method produces a summary of expected performance including the expected number of subjects required for the study, the statistical power, the probability of rejection at each segment, and the probability of failure to reject at each segment.
 
@@ -153,7 +156,7 @@ Given a full description of a segmented hypothesis testing protocol, this method
 # Identify hypothesis test to be used. Values are 1t, 2t, r, 1z, 2z 
 stat_procedure_name <- "1t"
   
-# Initialise value parameters. NB: the value of alpha_weak will be computed for you automatically. 
+# Initialise study parameters. NB: the value of alpha_weak will be computed automatically. 
 max_n_segments <- 3
 n_per_segment <- 20
 alpha_total <- 0.05
@@ -193,7 +196,7 @@ remaining 1-base rate proportion of the studies.
 # Identify hypothesis test to be used. Values are 1t, 2t, r, 1z, 2z 
 stat_procedure_name <- "1t"
   
-# Initialise value parameters. NB: the value of alpha_weak will be computed for you  
+# Initialise study parameters. NB: the value of alpha_weak will be computed for you  
 max_n_segments <- 3
 n_per_segment <- 20
 alpha_total <- 0.05
@@ -236,7 +239,10 @@ alpha_total <- 0.05
 alpha_strong <- 0.01
 
 # State the expected effect sizes and corresponding base rate probabilities
-# as vectors
+# as vectors. In this example, a true effect size of 0.1 is estimated/assumed to be
+# present in half of all studies, and effect of 0.2 is estimated to be present
+# in 20% of all studies, and effects of 0.4 and 0.8 are estimated to be
+# present in 15% of studies each.
 effect_sizes <- c(0.1, 0.2, 0.4, 0.8)
 base_rates <- c(0.5, 0.2, 0.15, 0.15)
 
@@ -253,9 +259,9 @@ print(seght_outcomes)
 ```
 
 
-### search_kmax
+## search_kmax
 
-Use this function when the researcher wants help choosing kmax (maximum number of segments) for a planned study with given statistical procedure, alpha total, alpha strong, effect size and target power level. As above, this method can be called with an optional base rate parameter.
+Use this function when the researcher wants help choosing kmax (the maximum number of segments) for a planned study with given statistical procedure, alpha total, alpha strong, effect size and target power level. As above, this method can be called with an optional base rate parameter.
 
 ```{r search_kmax}
 

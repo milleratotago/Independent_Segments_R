@@ -218,7 +218,9 @@ expected_significant_effect.TwoSampleT <- function(stat_procedure, alpha_one_tai
     # in scope and initialised at the time of the call to integral(args) below
     t_prob_times_value <- function(t)
     {
-      dt(t, df = df, ncp = noncen_parameter) * t
+      suppressWarnings(
+        dt(t, df = df, ncp = noncen_parameter) * t
+      )
     }
 
     # Integral produces a message about algorithm used. We don't want it, so we wrap the
@@ -259,7 +261,9 @@ expected_significant_effect_bounded.TwoSampleT <- function(stat_procedure, alpha
   # in scope and initialised at the time of the call to integral(args) below
   t_prob_times_value <- function(t)
   {
-    dt(t, df = df, ncp = noncen_parameter) * t
+    suppressWarnings(
+      dt(t, df = df, ncp = noncen_parameter) * t
+    )
   }
 
   # Integral produces a message about algorithm used. We don't want it, so we wrap the

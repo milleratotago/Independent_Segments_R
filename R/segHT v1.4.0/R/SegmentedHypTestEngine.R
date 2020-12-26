@@ -377,7 +377,7 @@ run_int_subjects_scenario  <- function(segmented_researcher, stat_procedure, tru
   results$exp_n_subj <- exp_n_subj
   results$exp_n_subj_sqr <- exp_n_subj_sqr
 
-  # Expected size of significant effect, conditional on rejection. Useful for simulations onle.
+  # Expected size of significant effect, conditional on rejection. Useful for simulations only.
 
   # Find the expected effect size (mean of effect size across infinitely many iterations) conditional on
   # a significant result, for a given researcher object (kmax, nsubjects, alphastrong and alpha weak), and
